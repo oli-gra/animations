@@ -1,5 +1,5 @@
-import React, {useState} from 'react'
-import { View, Animated, PanResponder, Dimensions, StyleSheet } from 'react-native'
+import React, {useState, useEffect} from 'react'
+import { View, Animated, PanResponder, Dimensions, StyleSheet, LayoutAnimation, UIManager } from 'react-native'
 
 const SCREEN_WIDTH = Dimensions.get('window').width
 const SWIPE_THRESHOLD = SCREEN_WIDTH / 4
@@ -7,6 +7,11 @@ const SWIPE_THRESHOLD = SCREEN_WIDTH / 4
 const deck = ({data,renderCard, renderNoMoreCards, onSwipeRight, onSwipeLeft}) => {
 
     const [currentCard, setCurrentCard] = useState(0)
+
+    useEffect(() => {
+        UIManager.setLayoutAnimationEnabledExperimental && UIManager.setLayoutAnimationEnabledExperimental(true)
+        LayoutAnimation.spring()
+    }, [currentCard])
 
     const transformCard = () => {
         const rotate = position.x.interpolate({
@@ -21,8 +26,8 @@ const deck = ({data,renderCard, renderNoMoreCards, onSwipeRight, onSwipeLeft}) =
     }
        
     const renderCards = () => {
-        if (currentCard === data.length + 1) {
-            renderNoMoreCards()
+        if (currentCard > (data.length - 1)) {
+            setCurrentCard(0)
         }
         return data.map((item,index) => {
             if (index < currentCard) { return null }
@@ -36,12 +41,12 @@ const deck = ({data,renderCard, renderNoMoreCards, onSwipeRight, onSwipeLeft}) =
                 </Animated.View>
             }
 
-            return <View 
-                style={styles.card}
+            return <Animated.View 
+                style={[styles.card, {top: 11 * (index - currentCard)}]}
                 key={item.id}
             >
                 {renderCard(item)}
-            </View>
+            </Animated.View>
         }).reverse()
     }
 
